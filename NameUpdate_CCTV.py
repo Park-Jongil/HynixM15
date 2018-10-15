@@ -13,7 +13,19 @@ def create_connection(db_file):
         print(e)
     return None
 
-
+def pg_create_connection(user,password,host,dbname,port):
+    try:
+        product_connection_string = "dbname={dbname} user={user} host={host} password={password} port={port}"\
+                            .format(dbname=dbname,
+                                    user=user,
+                                    host=host,
+                                    password=password,
+                                    port=port)   
+        product = psycopg2.connect(product_connection_string)
+        return product
+    except Error as e:
+        print(e)
+    return None
 
 
 def main():
