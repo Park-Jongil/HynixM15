@@ -3,8 +3,10 @@ import xml.etree.ElementTree as ET
 from datetime import datetime
 import sqlite3
 from sqlite3 import Error
+import sys
 
 tblCameraName = "CameraList"
+
 def create_connection(db_file):
     try:
         conn = sqlite3.connect(db_file)
@@ -84,21 +86,26 @@ def insert_CameraUpdate_by_key(conn,key,name,pipaddr,prtsp1,prtsp2,cipaddr,crtsp
     except :
         return None
 
+
 def main():
     database = "NaizDB.db"
+
+    ChkDB = 0
+    if (len(sys.argv) > 1) : ChkDB = int(sys.argv[1])
     naiz_url = 'http://10.236.1.100:80/camera/list.cgi?id=admin&password=spdlwm1234&key=all&method=get'
-#    naiz_url = 'http://naiz.re.kr:8001/camera/list.cgi?id=admin&password=admin&key=all&method=get'
     conn = create_connection(database)
+    cur = conn.cursor()
 
 # 카메라 리스트테이블이 존재하는지 확인하여 없으면 생성한다.
     CheckTable_Exist_CameraList(conn)
 # 카메라리스트 테이블의 CheckUpdate 값을 0 으로 초기화한다. 리스트에서 확인되면 1 로 변경.
 # 프로그램 수행후 값이 0 이면 삭제된 것으로 판단할수 있다.    
-    Check_CameraList_Update_False( conn )
-    cur = conn.cursor()
+    if (ChkDB == 1) : Check_CameraList_Update_False( conn )
+
     file = urllib.request.urlopen( naiz_url ).read().decode('euc-kr')
     root = ET.fromstring(file)
     iCount = 0
+
     for child in root :
         for sub in child :
             for item in sub :
@@ -118,23 +125,26 @@ def main():
                 findname = select_name_by_key( conn , UniqueKey )
                 if (findname==None) :
                     print("UniqueKey = " + UniqueKey)
-                    sql_stmt = "insert into CameraList(seq,name,ip_addr,rtsp_url1,rtsp_url2,status) values(?,?,?,?,?,?)"
-                    cur.execute( sql_stmt,(int(UniqueKey),Name,IP_Addr,RTSP_URL1,RTSP_URL2,0))
+                    sql_stmt = "insert into  " + tblCameraName + "(seq,name,ip_addr,rtsp_url1,rtsp_url2,status,CheckUpdate) values(?,?,?,?,?,?,1)"
+                    cur.execute( sql_stmt,(int(UniqueKey),Name,IP_Addr,RTSP_URL1,RTSP_URL2,"추가"))
                     conn.commit()
                     print("Insert Name = " + Name)
                     print("Address = " + IP_Addr)
                     print("RTSP_URL #1 = " + RTSP_URL1)
                     print("RTSP_URL #2 = " + RTSP_URL2)
+                    insert_CameraUpdate_by_key(conn,UniqueKey,Name,"","","",IP_Addr,RTSP_URL1,RTSP_URL2,"추가","")
                 else :
-                    Check_CameraList_Update_True(conn,UniqueKey)
+# 해당키로 기존에 있는 리스트라면 CheckUpdate 값을 1 로 변경                
+                    if (ChkDB == 1) : Check_CameraList_Update_True( conn , UniqueKey )
                     ipaddr = select_ipaddr_by_key( conn , UniqueKey )
                     rtsp1 = select_rtspurl_by_key( conn , UniqueKey )
                     if (findname != Name) or (ipaddr != IP_Addr) or (rtsp1 != RTSP_URL1) :
                         print("UniqueKey = " + UniqueKey)
-                        sql_stmt = "update CameraList set name=?,ip_addr=?,rtsp_url1=?,rtsp_url2=? where seq = ?"
+                        sql_stmt = "update  " + tblCameraName + " set name=?,ip_addr=?,rtsp_url1=?,rtsp_url2=? where seq = ?"
                         cur.execute( sql_stmt,(Name,IP_Addr,RTSP_URL1,RTSP_URL2,int(UniqueKey)))
                         conn.commit()
                         print("Update Name = " + Name)
+                        insert_CameraUpdate_by_key(conn,UniqueKey,Name,ipaddr,rtsp1,"",IP_Addr,RTSP_URL1,RTSP_URL2,"변경",findname)
             except :
                 print(" DB 에러 ")
 
@@ -143,4 +153,5 @@ def main():
 
 if __name__ == '__main__':
     main()
+    
     
