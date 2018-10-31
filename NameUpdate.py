@@ -58,7 +58,7 @@ def main():
     Nubi_DB = create_postgres_connection()
     conn = create_connection(database)
     cur = conn.cursor()
-    cur.execute("SELECT seq,prevName,name,CheckTime FROM CameraUpdate Where append = '변경' and CheckTime > '2018/10/02'")
+    cur.execute("SELECT seq,prevName,name,CheckTime,curr_ip_addr FROM CameraUpdate Where append = '변경' and CheckTime > '2018/10/02'")
     rows = cur.fetchall()
     print("변경된 내역")
     print(" Sequence    Name  <==  PrevName")
@@ -66,7 +66,7 @@ def main():
         sql_stmt = "Update tb_skh_point_cctv set  device_name = '" + row[2] + "' Where id = " + str(row[0]) + ";"
         print( sql_stmt )
         if (Nubi_DB != None) :
-            sql_stmt = "Update public.tb_skh_point_cctv set  device_name = '" + row[2] + "' Where id = " + str(row[0]) + ";"
+            sql_stmt = "Update public.tb_skh_point_cctv set device_name='"+row[2]+"',device_ip='"+row[4]+"' Where id = " + str(row[0]) + ";"
             Update_Nubicom_DataBase( Nubi_DB , sql_stmt )
 
     cur = conn.cursor()
