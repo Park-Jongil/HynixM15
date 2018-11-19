@@ -1,0 +1,30 @@
+<?xml version="1.0"?>
+<data>
+  <naiz_url cnt="2">
+    <getlist>http://naiz.re.kr:8001/camera/list.cgi?id=admin&amp;password=admin&amp;key=all&amp;method=get</getlist>
+    <getstatus>http://naiz.re.kr:8001/event/status.cgi?id=admin&amp;password=admin&amp;key=all&amp;method=get</getstatus>
+  </naiz_url>
+  <db_config>
+    <Naiz_DB>
+      <Host>127.0.0.1</Host>
+      <Name>NaizCamera</Name>
+      <User>postgres</User>
+      <Password>postgres</Password>
+      <Port>5432</Port>
+    </Naiz_DB>
+    <Nubi_DB>
+      <Host>127.0.0.1</Host>
+      <Name>postgres</Name>
+      <User>postgres</User>
+      <Password>postgres</Password>
+      <Port>5432</Port>
+    </Nubi_DB>
+    <Secu_DB>
+      <Host>127.0.0.1</Host>
+      <Name>Secudium</Name>
+      <User>postgres</User>
+      <Password>postgres</Password>
+      <Port>5432</Port>
+    </Secu_DB>    
+  </db_config>
+</data>
